@@ -1,0 +1,71 @@
+
+<div class="hero-section">
+    <div class="row align-items-center">
+        <div class="col-md-6">
+            <h1 class="display-4 fw-bold">Your AI-Powered Personal Trainer</h1>
+            <p class="lead">Get personalized workout and diet plans tailored just for you, with emotional support to keep you motivated.</p>
+            <div class="d-grid gap-2 d-sm-flex">
+                <a href="/register" class="btn btn-primary btn-lg px-4 gap-3">Get Started</a>
+                <a href="#how-it-works" class="btn btn-outline-secondary btn-lg px-4">Learn More</a>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <img src="{{ url_for('static', filename='images/hero-image.png') }}" alt="Fitness App" class="img-fluid">
+        </div>
+    </div>
+</div>
+
+<section id="how-it-works" class="py-5">
+    <div class="container">
+        <h2 class="text-center mb-5">How It Works</h2>
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <i class="fas fa-user-circle fa-3x mb-3 text-primary"></i>
+                        <h5 class="card-title">Create Your Profile</h5>
+                        <p class="card-text">Tell us about your goals, fitness level, and preferences so we can personalize your experience.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <i class="fas fa-brain fa-3x mb-3 text-primary"></i>
+                        <h5 class="card-title">AI Recommendations</h5>
+                        <p class="card-text">Our AI analyzes your data to create the perfect workout and nutrition plan for you.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <i class="fas fa-chart-line fa-3x mb-3 text-primary"></i>
+                        <h5 class="card-title">Track & Improve</h5>
+                        <p class="card-text">Monitor your progress and get adaptive recommendations as you improve.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-6">
+                <h2>Personalized Workouts</h2>
+                <p>Our AI creates workout plans based on your fitness level, available equipment, time constraints, and personal goals.</p>
+                <ul class="list-unstyled">
+                    <li class="mb-2"><i class="fas fa-check text-success me-2"></i> Tailored to your schedule</li>
+                    <li class="mb-2"><i class="fas fa-check text-success me-2"></i> Adaptive difficulty</li>
+                    <li class="mb-2"><i class="fas fa-check text-success me-2"></i> Video demonstrations</li>
+                    <li class="mb-2"><i class="fas fa-check text-success me-2"></i> Progress tracking</li>
+                </ul>
+            </div>
+            <div class="col-md-6">
+                <img src="{{ url_for('static', filename='images/workout-demo.png') }}" alt="Workout Demo" class="img-fluid rounded">
+            </div>
+        </div>
+    </div>
+</section>

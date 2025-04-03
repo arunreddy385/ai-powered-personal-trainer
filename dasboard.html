@@ -1,0 +1,285 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-6">
+        <h2>Welcome back, {{ user.name }}!</h2>
+        <p class="lead">Here's your personalized fitness dashboard</p>
+    </div>
+    <div class="col-md-6 text-md-end">
+        <div class="btn-group">
+            <button class="btn btn-outline-primary">Today's Workout</button>
+            <button class="btn btn-outline-secondary">Meal Plan</button>
+            <button class="btn btn-outline-success">Progress</button>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Stats Overview -->
+    <div class="col-md-3 mb-4">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <h6 class="card-subtitle mb-2 text-muted">Current Weight</h6>
+                <h3 class="card-title">{{ user.current_weight }} kg</h3>
+                <p class="small text-{{ 'success' if user.weight_change > 0 else 'danger' if user.weight_change < 0 else 'muted' }}">
+                    {{ user.weight_change|abs }} kg {{ 'gain' if user.weight_change > 0 else 'loss' if user.weight_change < 0 else 'no change' }} from last week
+                </p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3 mb-4">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <h6 class="card-subtitle mb-2 text-muted">BMI</h6>
+                <h3 class="card-title">{{ user.bmi }}</h3>
+                <p class="small text-{{ 'success' if user.bmi_category == 'Normal weight' else 'warning' }}">
+                    {{ user.bmi_category }}
+                </p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3 mb-4">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <h6 class="card-subtitle mb-2 text-muted">Workout Streak</h6>
+                <h3 class="card-title">{{ user.streak }} days</h3>
+                <p class="small text-muted">Keep it going!</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3 mb-4">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <h6 class="card-subtitle mb-2 text-muted">Goal Progress</h6>
+                <div class="progress mb-2" style="height: 20px;">
+                    <div class="progress mt-2" style="height: 24px; border-radius: 12px;">
+                        <div class="progress-bar bg-success progress-bar-striped progress-bar-animated" 
+                             role="progressbar" 
+                             aria-valuenow="{{ user.goal_progress }}" 
+                             aria-valuemin="0" 
+                             aria-valuemax="100"
+                             id="goalProgressBar">
+                            <span class="progress-text fw-bold">{{ user.goal_progress }}% Complete</span>
+                        </div>
+                    </div>
+                </div>
+                <p class="small text-muted">{{ user.goal }} ({{ user.goal_target }})</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8 mb-4">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5 class="mb-0">Weekly Progress</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="progressChart" height="250"></canvas>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4 mb-4">
+        <div class="card h-100">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Today's Workout</h5>
+                <span class="badge bg-primary">{{ user.today_workout.duration }} min</span>
+            </div>
+            <div class="card-body">
+                <h6 class="text-muted">{{ user.today_workout.type }}</h6>
+                <ul class="list-group list-group-flush mb-3">
+                    {% for exercise in user.today_workout.exercises %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        {{ exercise.name }}
+                        <span class="badge bg-light text-dark">{{ exercise.sets }}x{{ exercise.reps }}</span>
+                    </li>
+                    {% endfor %}
+                </ul>
+                <button class="btn btn-primary w-100">Start Workout</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6 mb-4">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5 class="mb-0">Today's Nutrition</h5>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-4">
+                        <h6>Calories</h6>
+                        <div class="progress-circle" data-value="{{ (user.today_nutrition.calories / user.today_nutrition.calories_goal * 100)|round }}">
+                            <span>{{ user.today_nutrition.calories }}/{{ user.today_nutrition.calories_goal }}</span>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <h6>Protein</h6>
+                        <div class="progress-circle" data-value="{{ (user.today_nutrition.protein / user.today_nutrition.protein_goal * 100)|round }}">
+                            <span>{{ user.today_nutrition.protein }}g/{{ user.today_nutrition.protein_goal }}g</span>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <h6>Carbs</h6>
+                        <div class="progress-circle" data-value="{{ (user.today_nutrition.carbs / user.today_nutrition.carbs_goal * 100)|round }}">
+                            <span>{{ user.today_nutrition.carbs }}g/{{ user.today_nutrition.carbs_goal }}g</span>
+                        </div>
+                    </div>
+                </div>
+                <hr>
+                <h6>Meal Plan</h6>
+                <div class="accordion" id="mealAccordion">
+                    {% for meal in user.today_nutrition.meals %}
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="heading{{ loop.index }}">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" 
+                                    data-bs-target="#collapse{{ loop.index }}" aria-expanded="false" 
+                                    aria-controls="collapse{{ loop.index }}">
+                                {{ meal.name }} ({{ meal.calories }} kcal)
+                            </button>
+                        </h2>
+                        <div id="collapse{{ loop.index }}" class="accordion-collapse collapse" 
+                             aria-labelledby="heading{{ loop.index }}" data-bs-parent="#mealAccordion">
+                            <div class="accordion-body">
+                                <ul class="list-unstyled">
+                                    {% for item in meal.items %}
+                                    <li class="mb-1">
+                                        <strong>{{ item.name }}</strong>: 
+                                        {{ item.amount }} ({{ item.calories }} kcal)
+                                        {% if item.protein or item.carbs or item.fat %}
+                                        <br>
+                                        <small class="text-muted">
+                                            P: {{ item.protein }}g, C: {{ item.carbs }}g, F: {{ item.fat }}g
+                                        </small>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6 mb-4">
+        <div class="card h-100">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">AI Coach Message</h5>
+                <i class="fas fa-robot text-primary"></i>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <p>{{ user.ai_message }}</p>
+                </div>
+                <h6>Recent Activity</h6>
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <div class="timeline-item-marker">
+                            <div class="timeline-item-marker-indicator bg-{{ activity.type_color }}"></div>
+                        </div>
+                        <div class="timeline-item-content">
+                            <div class="d-flex justify-content-between">
+                                <span class="fw-bold">{{ activity.title }}</span>
+                                <small class="text-muted">{{ activity.time }}</small>
+                            </div>
+                            <p class="mb-0">{{ activity.description }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="{{ url_for('static', filename='js/chart.js') }}"></script>
+<script>
+    // Progress Chart
+    const ctx = document.getElementById('progressChart').getContext('2d');
+    const progressChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+            datasets: [
+                {
+                    label: 'Workout Completion',
+                    data: [80, 100, 70, 90, 50, 100, 60],
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    tension: 0.3,
+                    fill: true
+                },
+                {
+                    label: 'Nutrition Goals',
+                    data: [70, 80, 90, 60, 80, 50, 90],
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                    tension: 0.3,
+                    fill: true
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'top',
+                },
+                tooltip: {
+                    mode: 'index',
+                    intersect: false,
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 100
+                }
+            }
+        }
+    });
+    
+    // Progress Circles
+    document.querySelectorAll('.progress-circle').forEach(el => {
+        const value = el.getAttribute('data-value');
+        const size = 80;
+        const strokeWidth = 8;
+        const radius = (size - strokeWidth) / 2;
+        const circumference = radius * 2 * Math.PI;
+        const offset = circumference - (value / 100) * circumference;
+        
+        el.innerHTML = `
+            <svg width="${size}" height="${size}" class="progress-circle-svg">
+                <circle
+                    class="progress-circle-bg"
+                    stroke="#eee"
+                    stroke-width="${strokeWidth}"
+                    fill="transparent"
+                    r="${radius}"
+                    cx="${size / 2}"
+                    cy="${size / 2}"
+                />
+                <circle
+                    class="progress-circle-fill"
+                    stroke="#4CAF50"
+                    stroke-width="${strokeWidth}"
+                    stroke-dasharray="${circumference} ${circumference}"
+                    stroke-dashoffset="${offset}"
+                    stroke-linecap="round"
+                    fill="transparent"
+                    r="${radius}"
+                    cx="${size / 2}"
+                    cy="${size / 2}"
+                    transform="rotate(-90 ${size / 2} ${size / 2})"
+                />
+            </svg>
+            <div class="progress-circle-text">${el.firstChild.textContent}</div>
+        `;
+    });
+</script>
